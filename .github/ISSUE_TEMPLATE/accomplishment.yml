@@ -1,0 +1,19 @@
+# File: .github/ISSUE_TEMPLATE/accomplishment.yml
+
+name: 🎉 Accomplishment
+about: Log a new club milestone so it shows up on our website
+title: "[Month YYYY] – "
+labels: accomplishment
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Describe your milestone here.**
+        - What we did
+        - Who led it
+        - Any stats or links
+  - type: textarea
+    id: details
+    attributes:
+      label: More details (optional)
+      description: Add any extra context or links
