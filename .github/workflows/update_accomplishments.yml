@@ -1,3 +1,6 @@
+- name: Debug: show first lines of script
+  run: head -n 5 .github/scripts/generate_accomplishments.js
+
 name: 📋 Update Accomplishments README
 
 on:
