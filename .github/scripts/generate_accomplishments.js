@@ -1,26 +1,30 @@
 // .github/scripts/generate_accomplishments.js
-import { writeFileSync, readFileSync } from 'fs';
-import { Octokit } from '@octokit/rest';
-
-const [owner] = process.env.GITHUB_REPOSITORY.split('/');
-const repo = 'accomplishments';
-const octokit = new Octokit();
+const fs = require('fs');
+const { Octokit } = require('@octokit/rest');
 
 async function run() {
-  // 1) fetch all issues labeled "accomplishment"
+  // 1) determine owner & repo
+  const [owner] = process.env.GITHUB_REPOSITORY.split('/');
+  const repo = 'accomplishments';
+
+  // 2) instantiate Octokit with the built‑in token
+  const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+
+  // 3) fetch all issues labeled "accomplishment"
   const { data: issues } = await octokit.issues.listForRepo({
-    owner, repo,
+    owner,
+    repo,
     labels: 'accomplishment',
     state: 'all',
     per_page: 100
   });
 
-  // 2) build markdown table
+  // 4) build a markdown table
   const rows = issues.map(i => {
     const date = new Date(i.created_at)
       .toLocaleString('default',{month:'short',year:'numeric'});
     const title = i.title.replace(/^\[.*?\]\s*–\s*/, '');
-    const desc  = i.body.split('\n')[0];
+    const desc  = (i.body.split('\n').find(l=>l.trim())||'').trim();
     return `| ${date} | [${title}](${i.html_url}) | ${desc} |`;
   });
 
@@ -30,14 +34,14 @@ async function run() {
     ...rows
   ].join('\n');
 
-  // 3) insert into README.md
-  const path = 'README.md';
-  const readme = readFileSync(path, 'utf8');
+  // 5) insert into README.md
+  const readmePath = 'README.md';
+  const readme = fs.readFileSync(readmePath, 'utf8');
   const updated = readme.replace(
-    /<!-- ACME:accomplishments-table -->[\s\S]*?(\r?\n|$)/,
+    /<!-- ACME:accomplishments-table -->[\s\S]*?(?=\r?\n|$)/,
     `<!-- ACME:accomplishments-table -->\n\n${table}\n`
   );
-  writeFileSync(path, updated, 'utf8');
+  fs.writeFileSync(readmePath, updated, 'utf8');
 }
 
 run().catch(err => {
