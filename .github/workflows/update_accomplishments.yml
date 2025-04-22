@@ -1,39 +1,42 @@
-
-name: 📋 Update Accomplishments README
+name: 📋 Auto-Update Accomplishments
 
 on:
   schedule:
-    # every night at midnight UTC
-    - cron: '0 0 * * *'
+    - cron: '0 0 * * *'  # Daily at midnight UTC
   issues:
     types: [opened, edited, reopened, closed]
 
 jobs:
-  build:
+  update-readme:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: read
+    
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: '20'
 
       - name: Install dependencies
-        run: |
-          rm -rf node_modules  # Clear old modules
-          npm install @octokit/rest
+        run: npm install @octokit/rest
 
-      - name: Generate README table
+      - name: Generate accomplishments table
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-        run: node .github/scripts/generate_accomplishments.js
+        run: node .github/scripts/generate_accomplishments.mjs
 
-      - name: Commit & push changes
+      - name: Commit and push changes
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add README.md
-          git diff --quiet && echo "No changes to commit" || git commit -m "chore: update accomplishments table"
+          git diff --quiet && exit 0 || git commit -m "📚 docs: update accomplishments table"
           git push
