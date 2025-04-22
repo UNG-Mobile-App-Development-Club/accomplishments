@@ -1,7 +1,7 @@
 ---
 name: "\U0001F389 Accomplishment"
 about: Log a new club milestone so it shows up on our website
-title: "\U0001F389 Accomplishment"
+title: 'Enter Accomplishment Title Here:'
 labels: accomplishment
 assignees: ''
 
